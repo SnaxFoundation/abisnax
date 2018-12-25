@@ -962,9 +962,9 @@ enhanced-resolve@^4.0.0, enhanced-resolve@^4.1.0:
     memory-fs "^0.4.0"
     tapable "^1.0.0"
 
-eosjs-ecc@^4.0.1:
+snaxjs-ecc@^4.0.1:
   version "4.0.4"
-  resolved "https://registry.yarnpkg.com/eosjs-ecc/-/eosjs-ecc-4.0.4.tgz#431450f30a6f73088ff5d7ba1ebdfe967a5ca4ab"
+  resolved "https://registry.yarnpkg.com/snaxjs-ecc/-/snaxjs-ecc-4.0.4.tgz#431450f30a6f73088ff5d7ba1ebdfe967a5ca4ab"
   dependencies:
     bigi "^1.4.2"
     browserify-aes "^1.0.6"

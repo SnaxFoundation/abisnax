@@ -1,36 +1,36 @@
-## abieos
+## abisnax
 
-Binary <> JSON conversion using ABIs. Compatible with languages which can interface to C; see [src/abieos.h](src/abieos.h).
+Binary <> JSON conversion using ABIs. Compatible with languages which can interface to C; see [src/abisnax.h](src/abisnax.h).
 
 Alpha release. Feedback requested.
 
 ## Packing transactions
 
-1. Create a context: `abieos_create`
-1. Use `abieos_set_abi` to load [eosjs2/src/transaction.abi](https://github.com/EOSIO/eosjs2/blob/master/src/transaction.abi) into contract 0.
-1. Use `abieos_set_abi` to load the contract's ABI.
-1. Use `abieos_json_to_bin` and `abieos_get_bin_hex` to convert action data to hex. Use `abieos_get_type_for_action` to get the action's type.
-1. Use `abieos_json_to_bin` and `abieos_get_bin_hex` to convert transaction to hex. Use `contract = 0` and `type = abieos_string_to_name(context, "transaction")`.
-1. Destroy the context: `abieos_destroy`
+1. Create a context: `abisnax_create`
+1. Use `abisnax_set_abi` to load [snaxjs2/src/transaction.abi](https://github.com/SNAX/snaxjs2/blob/master/src/transaction.abi) into contract 0.
+1. Use `abisnax_set_abi` to load the contract's ABI.
+1. Use `abisnax_json_to_bin` and `abisnax_get_bin_hex` to convert action data to hex. Use `abisnax_get_type_for_action` to get the action's type.
+1. Use `abisnax_json_to_bin` and `abisnax_get_bin_hex` to convert transaction to hex. Use `contract = 0` and `type = abisnax_string_to_name(context, "transaction")`.
+1. Destroy the context: `abisnax_destroy`
 
 ## Usage note
 
-abieos expects object attributes to be in order. It will complain about missing attributes if they are out of order.
+abisnax expects object attributes to be in order. It will complain about missing attributes if they are out of order.
 
 ## Example data
 
-Example action data for `abieos_json_to_bin`:
+Example action data for `abisnax_json_to_bin`:
 
 ```
 {
     "from": "useraaaaaaaa",
     "to": "useraaaaaaab",
-    "quantity": "0.0001 SYS",
+    "quantity": "0.0001 SNAX",
     "memo": ""
 }
 ```
 
-Example transaction data for `abieos_json_to_bin`:
+Example transaction data for `abisnax_json_to_bin`:
 
 ```
 {
@@ -42,7 +42,7 @@ Example transaction data for `abieos_json_to_bin`:
     "delay_sec": 0,
     "context_free_actions": [],
     "actions": [{
-        "account": "eosio.token",
+        "account": "snax.token",
         "name": "transfer",
         "authorization":[{
             "actor":"useraaaaaaaa",

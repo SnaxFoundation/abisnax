@@ -1,6 +1,6 @@
 #include <stdexcept>
 
-namespace abieos {
+namespace abisnax {
 
 struct error : std::exception {
     std::string message;
@@ -9,4 +9,4 @@ struct error : std::exception {
     virtual const char* what() const noexcept { return message.c_str(); }
 };
 
-} // namespace abieos
+} // namespace abisnax

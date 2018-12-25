@@ -1,4 +1,4 @@
-// copyright defined in abieos/LICENSE.txt
+// copyright defined in abisnax/LICENSE.txt
 
 #include <algorithm>
 #include <array>
@@ -7,10 +7,10 @@
 #include <string>
 #include <string_view>
 
-#include "abieos_error.hpp"
+#include "abisnax_error.hpp"
 #include "ripemd160.hpp"
 
-namespace abieos {
+namespace abisnax {
 
 inline constexpr char base58_chars[] = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
@@ -185,7 +185,7 @@ std::string key_to_string(const Key& key, const char (&suffix)[suffix_size], con
 }
 
 inline public_key string_to_public_key(std::string_view s) {
-    if (s.size() >= 3 && s.substr(0, 3) == "EOS") {
+    if (s.size() >= 3 && s.substr(0, 3) == "SNAX") {
         auto whole = base58_to_binary<37>(s.substr(3));
         public_key key{key_type::k1};
         static_assert(whole.size() == key.data.size() + 4);
@@ -245,4 +245,4 @@ inline std::string signature_to_string(const signature& signature) {
         throw error("unrecognized signature format");
 }
 
-} // namespace abieos
+} // namespace abisnax

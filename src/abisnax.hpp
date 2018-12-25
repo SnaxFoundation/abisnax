@@ -1,4 +1,4 @@
-// copyright defined in abieos/LICENSE.txt
+// copyright defined in abisnax/LICENSE.txt
 
 #include <boost/algorithm/hex.hpp>
 #include <boost/container/flat_map.hpp>
@@ -10,13 +10,13 @@
 #include <variant>
 #include <vector>
 
-#include "abieos_numeric.hpp"
+#include "abisnax_numeric.hpp"
 
 #include "rapidjson/reader.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
 
-namespace abieos {
+namespace abisnax {
 
 inline constexpr bool trace_json_to_jvalue_event = false;
 inline constexpr bool trace_json_to_jvalue = false;
@@ -459,7 +459,7 @@ T json_to_number(State& state, event_type event) {
         }
     }
     throw error("expected number or boolean");
-} // namespace abieos
+} // namespace abisnax
 
 struct bytes {
     std::vector<char> data;
@@ -1253,7 +1253,7 @@ constexpr void for_each_field(struct_def*, F f) {
 }
 
 struct action_def {
-    ::abieos::name name{};
+    ::abisnax::name name{};
     std::string type{};
     std::string ricardian_contract{};
 };
@@ -1266,7 +1266,7 @@ constexpr void for_each_field(action_def*, F f) {
 }
 
 struct table_def {
-    ::abieos::name name{};
+    ::abisnax::name name{};
     std::string index_type{};
     std::vector<std::string> key_names{};
     std::vector<std::string> key_types{};
@@ -1341,7 +1341,7 @@ constexpr void for_each_field(abi_def*, F f) {
 }
 
 inline void check_abi_version(const std::string& s) {
-    if (s.substr(0, 13) != "eosio::abi/1.")
+    if (s.substr(0, 13) != "snax::abi/1.")
         throw error("unsupported abi version");
 }
 
@@ -1457,11 +1457,11 @@ inline bool json_to_jarray(jvalue& value, json_to_jvalue_state& state, event_typ
 template <typename T>
 struct native_serializer_impl : native_serializer {
     bool bin_to_native(void* v, bin_to_native_state& state, bool start) const override {
-        using ::abieos::bin_to_native;
+        using ::abisnax::bin_to_native;
         return bin_to_native(*reinterpret_cast<T*>(v), state, start);
     }
     bool json_to_native(void* v, json_to_native_state& state, event_type event, bool start) const override {
-        using ::abieos::json_to_native;
+        using ::abisnax::json_to_native;
         return json_to_native(*reinterpret_cast<T*>(v), state, event, start);
     }
 };
@@ -1473,11 +1473,11 @@ template <typename member_ptr>
 constexpr auto create_native_field_serializer_methods_impl() {
     struct impl : native_field_serializer_methods {
         bool bin_to_native(void* v, bin_to_native_state& state, bool start) const override {
-            using ::abieos::bin_to_native;
+            using ::abisnax::bin_to_native;
             return bin_to_native(member_from_void(member_ptr{}, v), state, start);
         }
         bool json_to_native(void* v, json_to_native_state& state, event_type event, bool start) const override {
-            using ::abieos::json_to_native;
+            using ::abisnax::json_to_native;
             return json_to_native(member_from_void(member_ptr{}, v), state, event, start);
         }
     };
@@ -1831,14 +1831,14 @@ template <typename T>
 struct abi_serializer_impl : abi_serializer {
     bool json_to_bin(jvalue_to_bin_state& state, bool allow_extensions, const abi_type* type, event_type event,
                      bool start) const override {
-        return ::abieos::json_to_bin((T*)nullptr, state, allow_extensions, type, event, start);
+        return ::abisnax::json_to_bin((T*)nullptr, state, allow_extensions, type, event, start);
     }
     bool json_to_bin(json_to_bin_state& state, bool allow_extensions, const abi_type* type, event_type event,
                      bool start) const override {
-        return ::abieos::json_to_bin((T*)nullptr, state, allow_extensions, type, event, start);
+        return ::abisnax::json_to_bin((T*)nullptr, state, allow_extensions, type, event, start);
     }
     bool bin_to_json(bin_to_json_state& state, bool allow_extensions, const abi_type* type, bool start) const override {
-        return ::abieos::bin_to_json((T*)nullptr, state, allow_extensions, type, start);
+        return ::abisnax::bin_to_json((T*)nullptr, state, allow_extensions, type, start);
     }
 };
 
@@ -1857,8 +1857,8 @@ struct abi_field {
 struct abi_type {
     std::string name{};
     std::string alias_of_name{};
-    const ::abieos::struct_def* struct_def{};
-    const ::abieos::variant_def* variant_def{};
+    const ::abisnax::struct_def* struct_def{};
+    const ::abisnax::variant_def* variant_def{};
     abi_type* alias_of{};
     abi_type* optional_of{};
     abi_type* extension_of{};
@@ -2559,4 +2559,4 @@ inline bool bin_to_json(std::string*, bin_to_json_state& state, bool, const abi_
     return state.writer.String(s.c_str(), s.size());
 }
 
-} // namespace abieos
+} // namespace abisnax

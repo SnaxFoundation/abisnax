@@ -1,15 +1,15 @@
-// copyright defined in abieos/LICENSE.txt
+// copyright defined in abisnax/LICENSE.txt
 
-#include "abieos.h"
-#include "abieos.hpp"
+#include "abisnax.h"
+#include "abisnax.hpp"
 
 #include <memory>
 
 inline const bool catch_all = true;
 
-using namespace abieos;
+using namespace abisnax;
 
-struct abieos_context_s {
+struct abisnax_context_s {
     const char* last_error = "";
     std::string last_error_buffer{};
     std::string result_str{};
@@ -23,7 +23,7 @@ void fix_null_str(const char*& s) {
         s = "";
 }
 
-void set_error(abieos_context* context, const char* error) noexcept {
+void set_error(abisnax_context* context, const char* error) noexcept {
     try {
         context->last_error_buffer = error;
         context->last_error = context->last_error_buffer.c_str();
@@ -35,7 +35,7 @@ void set_error(abieos_context* context, const char* error) noexcept {
 }
 
 template <typename T, typename F>
-auto handle_exceptions(abieos_context* context, T errval, F f) noexcept -> decltype(f()) {
+auto handle_exceptions(abisnax_context* context, T errval, F f) noexcept -> decltype(f()) {
     if (!context)
         return errval;
     try {
@@ -59,9 +59,9 @@ auto handle_exceptions(abieos_context* context, T errval, F f) noexcept -> declt
     }
 }
 
-extern "C" abieos_context* abieos_create() {
+extern "C" abisnax_context* abisnax_create() {
     try {
-        return new abieos_context{};
+        return new abisnax_context{};
     } catch (error& e) {
         return nullptr;
     } catch (boost::exception& e) {
@@ -73,27 +73,27 @@ extern "C" abieos_context* abieos_create() {
     }
 }
 
-extern "C" void abieos_destroy(abieos_context* context) { delete context; }
+extern "C" void abisnax_destroy(abisnax_context* context) { delete context; }
 
-extern "C" const char* abieos_get_error(abieos_context* context) {
+extern "C" const char* abisnax_get_error(abisnax_context* context) {
     if (!context)
         return "context is null";
     return context->last_error;
 }
 
-extern "C" int abieos_get_bin_size(abieos_context* context) {
+extern "C" int abisnax_get_bin_size(abisnax_context* context) {
     if (!context)
         return 0;
     return context->result_bin.size();
 }
 
-extern "C" const char* abieos_get_bin_data(abieos_context* context) {
+extern "C" const char* abisnax_get_bin_data(abisnax_context* context) {
     if (!context)
         return nullptr;
     return context->result_bin.data();
 }
 
-extern "C" const char* abieos_get_bin_hex(abieos_context* context) {
+extern "C" const char* abisnax_get_bin_hex(abisnax_context* context) {
     return handle_exceptions(context, nullptr, [&] {
         context->result_str.clear();
         boost::algorithm::hex(context->result_bin.begin(), context->result_bin.end(),
@@ -102,19 +102,19 @@ extern "C" const char* abieos_get_bin_hex(abieos_context* context) {
     });
 }
 
-extern "C" uint64_t abieos_string_to_name(abieos_context* context, const char* str) {
+extern "C" uint64_t abisnax_string_to_name(abisnax_context* context, const char* str) {
     fix_null_str(str);
     return string_to_name(str);
 }
 
-extern "C" const char* abieos_name_to_string(abieos_context* context, uint64_t name) {
+extern "C" const char* abisnax_name_to_string(abisnax_context* context, uint64_t name) {
     return handle_exceptions(context, nullptr, [&] {
         context->result_str = name_to_string(name);
         return context->result_str.c_str();
     });
 }
 
-extern "C" abieos_bool abieos_set_abi(abieos_context* context, uint64_t contract, const char* abi) {
+extern "C" abisnax_bool abisnax_set_abi(abisnax_context* context, uint64_t contract, const char* abi) {
     fix_null_str(abi);
     return handle_exceptions(context, false, [&] {
         context->last_error = "abi parse error";
@@ -128,7 +128,7 @@ extern "C" abieos_bool abieos_set_abi(abieos_context* context, uint64_t contract
     });
 }
 
-extern "C" abieos_bool abieos_set_abi_bin(abieos_context* context, uint64_t contract, const char* data, size_t size) {
+extern "C" abisnax_bool abisnax_set_abi_bin(abisnax_context* context, uint64_t contract, const char* data, size_t size) {
     return handle_exceptions(context, false, [&] {
         context->last_error = "abi parse error";
         if (!data || !size)
@@ -144,18 +144,18 @@ extern "C" abieos_bool abieos_set_abi_bin(abieos_context* context, uint64_t cont
     });
 }
 
-extern "C" abieos_bool abieos_set_abi_hex(abieos_context* context, uint64_t contract, const char* hex) {
+extern "C" abisnax_bool abisnax_set_abi_hex(abisnax_context* context, uint64_t contract, const char* hex) {
     fix_null_str(hex);
     return handle_exceptions(context, false, [&] {
         std::vector<char> data;
         boost::algorithm::unhex(hex, hex + strlen(hex), std::back_inserter(data));
-        return abieos_set_abi_bin(context, contract, data.data(), data.size());
+        return abisnax_set_abi_bin(context, contract, data.data(), data.size());
     });
 }
 
-extern "C" const char* abieos_get_type_for_action(abieos_context* context, uint64_t contract, uint64_t action) {
+extern "C" const char* abisnax_get_type_for_action(abisnax_context* context, uint64_t contract, uint64_t action) {
     return handle_exceptions(context, nullptr, [&] {
-        auto contract_it = context->contracts.find(::abieos::name{contract});
+        auto contract_it = context->contracts.find(::abisnax::name{contract});
         if (contract_it == context->contracts.end())
             throw error("contract \"" + name_to_string(contract) + "\" is not loaded");
         auto& c = contract_it->second;
@@ -168,13 +168,13 @@ extern "C" const char* abieos_get_type_for_action(abieos_context* context, uint6
     });
 }
 
-extern "C" abieos_bool abieos_json_to_bin(abieos_context* context, uint64_t contract, const char* type,
+extern "C" abisnax_bool abisnax_json_to_bin(abisnax_context* context, uint64_t contract, const char* type,
                                           const char* json) {
     fix_null_str(type);
     fix_null_str(json);
     return handle_exceptions(context, false, [&] {
         context->last_error = "json parse error";
-        auto contract_it = context->contracts.find(::abieos::name{contract});
+        auto contract_it = context->contracts.find(::abisnax::name{contract});
         if (contract_it == context->contracts.end())
             throw error("contract \"" + name_to_string(contract) + "\" is not loaded");
         auto& t = get_type(contract_it->second.abi_types, type, 0);
@@ -183,18 +183,18 @@ extern "C" abieos_bool abieos_json_to_bin(abieos_context* context, uint64_t cont
     });
 }
 
-extern "C" abieos_bool abieos_json_to_bin_reorderable(abieos_context* context, uint64_t contract, const char* type,
+extern "C" abisnax_bool abisnax_json_to_bin_reorderable(abisnax_context* context, uint64_t contract, const char* type,
                                                       const char* json) {
     fix_null_str(type);
     fix_null_str(json);
     return handle_exceptions(context, false, [&] {
         context->last_error = "json parse error";
-        auto contract_it = context->contracts.find(::abieos::name{contract});
+        auto contract_it = context->contracts.find(::abisnax::name{contract});
         if (contract_it == context->contracts.end())
             throw error("contract \"" + name_to_string(contract) + "\" is not loaded");
         auto& t = get_type(contract_it->second.abi_types, type, 0);
         context->result_bin.clear();
-        ::abieos::jvalue value;
+        ::abisnax::jvalue value;
         if (!json_to_jvalue(value, json))
             return false;
         auto result = json_to_bin(context->result_bin, &t, value);
@@ -202,14 +202,14 @@ extern "C" abieos_bool abieos_json_to_bin_reorderable(abieos_context* context, u
     });
 }
 
-extern "C" const char* abieos_bin_to_json(abieos_context* context, uint64_t contract, const char* type,
+extern "C" const char* abisnax_bin_to_json(abisnax_context* context, uint64_t contract, const char* type,
                                           const char* data, size_t size) {
     fix_null_str(type);
     return handle_exceptions(context, nullptr, [&]() -> const char* {
         if (!data)
             size = 0;
         context->last_error = "binary decode error";
-        auto contract_it = context->contracts.find(::abieos::name{contract});
+        auto contract_it = context->contracts.find(::abisnax::name{contract});
         if (contract_it == context->contracts.end())
             throw error("contract \"" + name_to_string(contract) + "\" is not loaded");
         auto& t = get_type(contract_it->second.abi_types, type, 0);
@@ -222,12 +222,12 @@ extern "C" const char* abieos_bin_to_json(abieos_context* context, uint64_t cont
     });
 }
 
-extern "C" const char* abieos_hex_to_json(abieos_context* context, uint64_t contract, const char* type,
+extern "C" const char* abisnax_hex_to_json(abisnax_context* context, uint64_t contract, const char* type,
                                           const char* hex) {
     fix_null_str(hex);
     return handle_exceptions(context, nullptr, [&]() -> const char* {
         std::vector<char> data;
         boost::algorithm::unhex(hex, hex + strlen(hex), std::back_inserter(data));
-        return abieos_bin_to_json(context, contract, type, data.data(), data.size());
+        return abisnax_bin_to_json(context, contract, type, data.data(), data.size());
     });
 }
