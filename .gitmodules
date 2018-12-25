@@ -1,6 +1,6 @@
 [submodule "external/rapidjson"]
 	path = external/rapidjson
 	url = https://github.com/Tencent/rapidjson.git
-[submodule "external/eosjs"]
-	path = external/eosjs
-	url = git@github.com:EOSIO/eosjs2.git
+[submodule "external/snaxjs"]
+	path = external/snaxjs
+	url = https://github.com/SnaxFoundation/snaxjs2.git
