@@ -1341,7 +1341,7 @@ constexpr void for_each_field(abi_def*, F f) {
 }
 
 inline void check_abi_version(const std::string& s) {
-    if (s.substr(0, 13) != "snax::abi/1.")
+    if (s.substr(0, 12) != "snax::abi/1.")
         throw error("unsupported abi version");
 }
 
