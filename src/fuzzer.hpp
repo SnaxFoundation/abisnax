@@ -1,3 +1,5 @@
+#pragma once
+
 #include "abisnax.h"
 #include <string.h>
 

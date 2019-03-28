@@ -3,7 +3,6 @@
 #include "abisnax.h"
 #include "abisnax.hpp"
 #include "fuzzer.hpp"
-#include <boost/algorithm/hex.hpp>
 #include <stdexcept>
 #include <stdio.h>
 #include <string>
@@ -250,8 +249,8 @@ const char transactionAbi[] = R"({
 std::string string_to_hex(const std::string& s) {
     std::string result;
     uint8_t size = s.size();
-    boost::algorithm::hex(&size, &size + 1, std::back_inserter(result));
-    boost::algorithm::hex(s.begin(), s.end(), std::back_inserter(result));
+    abisnax::hex(&size, &size + 1, std::back_inserter(result));
+    abisnax::hex(s.begin(), s.end(), std::back_inserter(result));
     return result;
 }
 
@@ -355,13 +354,17 @@ void check_types() {
             abi = {transactionAbi, transactionAbi + strlen(transactionAbi)};
         } else if (contract == token) {
             abi_is_bin = true;
-            boost::algorithm::unhex(tokenHexAbi, tokenHexAbi + strlen(tokenHexAbi), std::back_inserter(abi));
+            std::string error;
+            if (!abisnax::unhex(error, tokenHexAbi, tokenHexAbi + strlen(tokenHexAbi), std::back_inserter(abi)))
+                throw std::runtime_error(error);
         } else if (contract == testAbiName) {
             abi_is_bin = false;
             abi = {testAbi, testAbi + strlen(testAbi)};
         } else if (contract == testHexAbiName) {
             abi_is_bin = true;
-            boost::algorithm::unhex(testHexAbi, testHexAbi + strlen(testHexAbi), std::back_inserter(abi));
+            std::string error;
+            if (!abisnax::unhex(error, testHexAbi, testHexAbi + strlen(testHexAbi), std::back_inserter(abi)))
+                throw std::runtime_error(error);
         } else {
             throw std::runtime_error("missing case in check_type");
         }
@@ -397,8 +400,7 @@ void check_types() {
     check_error(context, "failed to parse", [&] { return abisnax_json_to_bin(context, 0, "bool", R"(trues)"); });
     check_error(context, "expected number or boolean",
                 [&] { return abisnax_json_to_bin(context, 0, "bool", R"(null)"); });
-    check_error(context, "number is out of range or has bad format",
-                [&] { return abisnax_json_to_bin(context, 0, "bool", R"("foo")"); });
+    check_error(context, "invalid number", [&] { return abisnax_json_to_bin(context, 0, "bool", R"("foo")"); });
     check_type(context, 0, "int8", R"(0)");
     check_type(context, 0, "int8", R"(127)");
     check_type(context, 0, "int8", R"(-128)");
@@ -446,13 +448,13 @@ void check_types() {
     check_type(context, 0, "int64", R"("-9223372036854775808")");
     check_type(context, 0, "uint64", R"("0")");
     check_type(context, 0, "uint64", R"("18446744073709551615")");
-    check_error(context, "number is out of range or has bad format",
+    check_error(context, "number is out of range",
                 [&] { return abisnax_json_to_bin(context, 0, "int64", "9223372036854775808"); });
-    check_error(context, "number is out of range or has bad format",
+    check_error(context, "number is out of range",
                 [&] { return abisnax_json_to_bin(context, 0, "int64", "-9223372036854775809"); });
     check_error(context, "expected non-negative number",
                 [&] { return abisnax_json_to_bin(context, 0, "uint64", "-1"); });
-    check_error(context, "number is out of range or has bad format",
+    check_error(context, "number is out of range",
                 [&] { return abisnax_json_to_bin(context, 0, "uint64", "18446744073709551616"); });
     check_type(context, 0, "int128", R"("0")");
     check_type(context, 0, "int128", R"("1")");
@@ -540,7 +542,7 @@ void check_types() {
     check_type(context, 0, "block_timestamp_type", R"("2018-06-15T19:17:48.000")");
     check_error(context, "expected string containing block_timestamp_type",
                 [&] { return abisnax_json_to_bin(context, 0, "block_timestamp_type", "true"); });
-    check_type(context, 0, "name", R"("")", R"(".............")");
+    check_type(context, 0, "name", R"("")");
     check_type(context, 0, "name", R"("1")");
     check_type(context, 0, "name", R"("abcd")");
     check_type(context, 0, "name", R"("ab.cd.ef")");

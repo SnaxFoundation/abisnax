@@ -1,5 +1,7 @@
 // copyright defined in abisnax/LICENSE.txt
 
+#pragma once
+
 #include <stddef.h>
 #include <stdint.h>
 
@@ -45,6 +47,10 @@ abisnax_bool abisnax_set_abi_hex(abisnax_context* context, uint64_t contract, co
 // Get the type name for an action. The contract owns the returned memory. Returns null on error; use abisnax_get_error
 // to retrieve error.
 const char* abisnax_get_type_for_action(abisnax_context* context, uint64_t contract, uint64_t action);
+
+// Get the type name for a table. The contract owns the returned memory. Returns null on error; use abisnax_get_error
+// to retrieve error.
+const char* abisnax_get_type_for_table(abisnax_context* context, uint64_t contract, uint64_t table);
 
 // Convert json to binary. Use abisnax_get_bin_* to retrieve result. Returns false on error.
 abisnax_bool abisnax_json_to_bin(abisnax_context* context, uint64_t contract, const char* type, const char* json);

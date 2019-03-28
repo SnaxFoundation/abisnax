@@ -12,6 +12,7 @@ const transactionAbi = require('../../external/snaxjs/src/transaction.abi.json')
 import * as snaxjs from '../../external/snaxjs/src/snaxjs-api';
 import * as snaxjs_jsonrpc from '../../external/snaxjs/src/snaxjs-jsonrpc';
 import * as snaxjs_jssig from '../../external/snaxjs/src/snaxjs-jssig';
+import * as snaxjs_ser from '../../external/snaxjs/src/snaxjs-serialize';
 
 const useTokenHexApi = true;
 const tokenHexApi =
@@ -138,19 +139,19 @@ function name(s: string) {
 }
 
 const rpc = new snaxjs_jsonrpc.JsonRpc(rpcEndpoint, { fetch });
-const signatureProvider = new snaxjs_jssig.default(['5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr']);
+const signatureProvider = new snaxjs_jssig.JsSignatureProvider(['5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr']);
 const textEncoder = new (require('util').TextEncoder);
 const textDecoder = new (require('util').TextDecoder)('utf-8', { fatal: true });
 const api = new snaxjs.Api({ rpc, signatureProvider, chainId: null, textEncoder, textDecoder });
-const abiTypes = snaxjs.serialize.getTypesFromAbi(snaxjs.serialize.createInitialTypes(), abiAbi);
-const js2Types = snaxjs.serialize.getTypesFromAbi(snaxjs.serialize.createInitialTypes(), transactionAbi);
+const abiTypes = snaxjs_ser.getTypesFromAbi(snaxjs_ser.createInitialTypes(), abiAbi);
+const js2Types = snaxjs_ser.getTypesFromAbi(snaxjs_ser.createInitialTypes(), transactionAbi);
 
 function snaxjs_hex_abi_to_json(hex: string): any {
-    return api.rawAbiToJson(snaxjs.serialize.hexToUint8Array(hex));
+    return api.rawAbiToJson(snaxjs_ser.hexToUint8Array(hex));
 }
 
 function snaxjs_json_abi_to_hex(abi: any) {
-    let buf = new snaxjs.serialize.SerialBuffer({ textEncoder, textDecoder });
+    let buf = new snaxjs_ser.SerialBuffer({ textEncoder, textDecoder });
     abiTypes.get("abi_def").serialize(buf, {
         "types": [],
         "actions": [],
@@ -161,7 +162,7 @@ function snaxjs_json_abi_to_hex(abi: any) {
         "abi_extensions": [],
         ...abi
     });
-    return snaxjs.serialize.arrayToHex(buf.asUint8Array());
+    return snaxjs_ser.arrayToHex(buf.asUint8Array());
 }
 
 function abisnax_json_to_hex(contract: number, type: string, data: string) {
@@ -176,15 +177,15 @@ function abisnax_hex_to_json(contract: number, type: string, hex: string) {
 }
 
 function snaxjs_json_to_hex(types: any, type: string, data: any) {
-    let js2Type = snaxjs.serialize.getType(types, type);
-    let buf = new snaxjs.serialize.SerialBuffer({ textEncoder, textDecoder });
+    let js2Type = snaxjs_ser.getType(types, type);
+    let buf = new snaxjs_ser.SerialBuffer({ textEncoder, textDecoder });
     js2Type.serialize(buf, data);
-    return snaxjs.serialize.arrayToHex(buf.asUint8Array());
+    return snaxjs_ser.arrayToHex(buf.asUint8Array());
 }
 
 function snaxjs_hex_to_json(types: any, type: string, hex: string) {
-    let js2Type = snaxjs.serialize.getType(types, type);
-    let buf = new snaxjs.serialize.SerialBuffer({ textEncoder, textDecoder, array: snaxjs.serialize.hexToUint8Array(hex) });
+    let js2Type = snaxjs_ser.getType(types, type);
+    let buf = new snaxjs_ser.SerialBuffer({ textEncoder, textDecoder, array: snaxjs_ser.hexToUint8Array(hex) });
     return js2Type.deserialize(buf);
 }
 
@@ -208,10 +209,10 @@ function check_type(contract: number, types: any, type: string, data: string, ex
     json = JSON.stringify(JSON.parse(json));
 
     //console.log(type, data);
-    let js2Type = snaxjs.serialize.getType(types, type);
-    let buf = new snaxjs.serialize.SerialBuffer({ textEncoder, textDecoder });
+    let js2Type = snaxjs_ser.getType(types, type);
+    let buf = new snaxjs_ser.SerialBuffer({ textEncoder, textDecoder });
     js2Type.serialize(buf, JSON.parse(data));
-    let js2Hex = snaxjs.serialize.arrayToHex(buf.asUint8Array()).toUpperCase();
+    let js2Hex = snaxjs_ser.arrayToHex(buf.asUint8Array()).toUpperCase();
     //console.log(hex)
     //console.log(js2Hex)
     if (js2Hex != hex)
@@ -228,8 +229,8 @@ function check_types() {
     let test = name('test.abi');
     check(l.abisnax_set_abi_hex(context, token, cstr(tokenHexApi)));
     check(l.abisnax_set_abi(context, test, cstr(testAbi)));
-    const tokenTypes = snaxjs.serialize.getTypesFromAbi(snaxjs.serialize.createInitialTypes(), snaxjs_hex_abi_to_json(tokenHexApi));
-    const testTypes = snaxjs.serialize.getTypesFromAbi(snaxjs.serialize.createInitialTypes(), snaxjs_hex_abi_to_json(snaxjs_json_abi_to_hex(JSON.parse(testAbi))));
+    const tokenTypes = snaxjs_ser.getTypesFromAbi(snaxjs_ser.createInitialTypes(), snaxjs_hex_abi_to_json(tokenHexApi));
+    const testTypes = snaxjs_ser.getTypesFromAbi(snaxjs_ser.createInitialTypes(), snaxjs_hex_abi_to_json(snaxjs_json_abi_to_hex(JSON.parse(testAbi))));
 
     check_throw('Error: missing abi_def.version (type=string)', () => snaxjs_hex_abi_to_json(snaxjs_json_abi_to_hex({})));
     check_throw('Error: Unsupported abi version', () => snaxjs_hex_abi_to_json(snaxjs_json_abi_to_hex({ version: '' })));
@@ -370,7 +371,7 @@ function check_types() {
     check_type(0, js2Types, 'block_timestamp_type', '"2018-06-15T19:17:47.500"');
     check_type(0, js2Types, 'block_timestamp_type', '"2018-06-15T19:17:48.000"');
     check_throw('Error: Invalid time format', () => snaxjs_json_to_hex(js2Types, 'block_timestamp_type', true));
-    check_type(0, js2Types, 'name', '""', '"............."');
+    check_type(0, js2Types, 'name', '""');
     check_type(0, js2Types, 'name', '"1"');
     check_type(0, js2Types, 'name', '"abcd"');
     check_type(0, js2Types, 'name', '"ab.cd.ef"');
@@ -502,7 +503,7 @@ async function push_transfer() {
     let info = await rpc.get_info();
     let refBlock = await rpc.get_block(info.head_block_num - 3);
     let transaction = {
-        expiration: snaxjs.serialize.timePointSecToDate(snaxjs.serialize.dateToTimePointSec(refBlock.timestamp) + 10),
+        expiration: snaxjs_ser.timePointSecToDate(snaxjs_ser.dateToTimePointSec(refBlock.timestamp) + 10),
         ref_block_num: refBlock.block_num,
         ref_block_prefix: refBlock.ref_block_prefix,
         max_net_usage_words: 0,
@@ -528,7 +529,7 @@ async function push_transfer() {
     let sig = await signatureProvider.sign({
         chainId: info.chain_id,
         requiredKeys: await signatureProvider.getAvailableKeys(),
-        serializedTransaction: snaxjs.serialize.hexToUint8Array(transactionDataHex),
+        serializedTransaction: snaxjs_ser.hexToUint8Array(transactionDataHex),
         abis: [],
     });
     console.log('sig:', sig)
